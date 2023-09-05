@@ -917,7 +917,7 @@ class InputQueue(object):
 # Concolically execute testfunc with the given concrete_values. It
 # returns the value testfunc computes for the given concrete_values
 # and the branches it encountered to compute that result.
-def concolic_exec_input(testfunc, concrete_values, verbose = 0):
+def concolic_exec_input(testfunc, concrete_values: ConcreteValues, verbose = 0):
   global cur_path_constr, cur_path_constr_callers
   cur_path_constr = []
   cur_path_constr_callers = []
@@ -977,7 +977,15 @@ def concolic_find_input(constraint, ok_names, verbose=0):
   ## If Z3 was able to find example inputs that solve this
   ## constraint (i.e., ok == z3.sat), make a new input set
   ## containing the values from Z3's model, and return it.
-  return False, ConcreteValues()
+  model: z3.ModelRef
+  (ok, model) = fork_and_check(constraint)
+  concrete_values = ConcreteValues()
+  if ok==z3.sat:
+    for ok_name in ok_names:
+      concrete_values.add(ok_name,model[ok_name])
+    return True, concrete_values
+  else:
+    return False, concrete_values
 
 # Concolic execute func for many different paths and return all
 # computed results for those different paths.

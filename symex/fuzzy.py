@@ -990,8 +990,9 @@ def concolic_find_input(constraint, ok_names, verbose=0):
   (ok, model) = fork_and_check(constraint)
   concrete_values = ConcreteValues()
   if ok==z3.sat:
-    for ok_name in ok_names:
-      concrete_values.add(ok_name,model[ok_name])
+    for key in model:
+      if ok_names is None or key in ok_names:
+        concrete_values.add(key,model[key])
     return True, concrete_values
   else:
     return False, concrete_values
@@ -1016,6 +1017,15 @@ def concolic_execs(func, maxiter = 100, verbose = 0):
     (r, branch_conds, branch_callers) = concolic_exec_input(func, concrete_values, verbose)
     if r not in outs:
       outs.append(r)
+
+    for i in range(len(branch_conds)):
+      constr=concolic_force_branch(i,branch_conds,branch_callers)
+      if constr not in checked:
+        checked.add(constr)
+        (ok, cur_concrete_values) = concolic_find_input(constr,None)
+        if ok:
+          cur_concrete_values.inherit(concrete_values)
+          inputs.add(cur_concrete_values,branch_callers[i])
 
     ## Exercise 6: your code here.
     ##

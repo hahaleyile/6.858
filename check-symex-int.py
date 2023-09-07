@@ -105,7 +105,7 @@ if all_ok:
 
 
 print('Testing f..')
-f_results = fuzzy.concolic_execs(test_f, verbose=1)
+f_results = fuzzy.concolic_execs(test_f, verbose=2)
 
 f_expected = (100, 70, 80, 33, 1234, 40)
 if all(x in f_results for x in f_expected):

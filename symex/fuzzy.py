@@ -953,6 +953,15 @@ def concolic_force_branch(b, branch_conds, branch_callers, verbose = 1):
 
   constraint = None
 
+  if b>0:
+    constraint=branch_conds[0]
+    for i in range(1,b):
+      constraint=sym_and(constraint,branch_conds[i])
+    constraint=sym_and(constraint,sym_not(branch_conds[b]))
+  elif b==0:
+    constraint=sym_not(branch_conds[b])
+
+
   if verbose > 2:
     callers = branch_callers[b]
     print('Trying to branch at %s:%d:' % (callers[0], callers[1]))
